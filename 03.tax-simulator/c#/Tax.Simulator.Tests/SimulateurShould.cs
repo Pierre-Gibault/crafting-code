@@ -96,4 +96,30 @@ public class SimulateurShould
         
         act.Should().Throw<InvalidDataException>().WithMessage("Les salaires doivent être positifs.");
     }
+    
+    [Fact]
+    public void TestCalculateTaxForMarriedCoupleWithChildren()
+    {
+        var situationFamiliale = "Marié/Pacsé";
+        var salaireMensuel = 3000m;
+        var salaireMensuelConjoint = 3000m;
+        var nombreEnfants = 3;
+        
+        decimal act = Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        
+        act.Should().Be(3983.37m);
+    }
+    
+    [Fact]
+    public void TestLanceraUneExceptionPourUnNombreDenfantsNégatif()
+    {
+        var situationFamiliale = "Marié/Pacsé";
+        var salaireMensuel = 2000m;
+        var salaireMensuelConjoint = 2000m;
+        var nombreEnfants = -1;
+        
+        Action act = () => Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        
+        act.Should().Throw<ArgumentException>().WithMessage("Le nombre d'enfants ne peut pas être négatif.");
+    }
 }
