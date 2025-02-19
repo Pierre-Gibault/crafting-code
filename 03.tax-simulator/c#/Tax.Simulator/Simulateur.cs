@@ -2,89 +2,88 @@ namespace Tax.Simulator;
 
 public static class Simulateur
 {
-    private static readonly decimal[] TranchesImposition = {10225m, 26070m, 74545m, 160336m, 500000m}; // Plafonds des tranches
-    private static readonly decimal[] TauxImposition = {0.0m, 0.11m, 0.30m, 0.41m, 0.45m, 0.48m}; // Taux correspondants
-
-    public static decimal CalculerImpotsAnnuel(
-        string situationFamiliale,
-        decimal salaireMensuel,
-        decimal salaireMensuelConjoint,
-        int nombreEnfants)
+    private static readonly Dictionary<decimal, decimal> TranchesTauxImposition = new Dictionary<decimal, decimal>
     {
-        if (situationFamiliale != "Célibataire" && situationFamiliale != "Marié/Pacsé")
+        { 10225m, 0.0m },
+        { 26070m, 0.11m },
+        { 74545m, 0.30m },
+        { 160336m, 0.41m },
+        { 500000m, 0.45m },
+        { decimal.MaxValue, 0.48m }
+    };
+
+    public static Result<decimal> CalculerImpotsAnnuel(SituationFoyer situationFoyer)
+    {
+        var verificationResult = VerificationParametre(situationFoyer);
+        if (!verificationResult.IsSuccess)
         {
-            throw new ArgumentException("Situation familiale invalide.");
+            return Result<decimal>.Failure(verificationResult.Error);
         }
 
-        if (salaireMensuel <= 0)
-        {
-            throw new ArgumentException("Les salaires doivent être positifs.");
-        }
+        decimal revenuAnnuel = RevenuAnnuel(situationFoyer);
 
-        if (situationFamiliale == "Marié/Pacsé" && salaireMensuelConjoint < 0)
-        {
-            throw new InvalidDataException("Les salaires doivent être positifs.");
-        }
+        var baseQuotient = situationFoyer.SituationFamiliale == Statuts.Marie_Pacse ? 2 : 1;
 
-        if (nombreEnfants < 0)
-        {
-            throw new ArgumentException("Le nombre d'enfants ne peut pas être négatif.");
-        }
+        decimal quotientEnfants = situationFoyer.NbEnfants / 2m;
 
-        decimal revenuAnnuel;
-        if (situationFamiliale == "Marié/Pacsé")
-        {
-            revenuAnnuel = (salaireMensuel + salaireMensuelConjoint) * 12;
-        }
-        else
-        {
-            revenuAnnuel = salaireMensuel * 12;
-        }
+        decimal partsFiscales = PartsFiscales(baseQuotient, quotientEnfants, revenuAnnuel, out decimal impotParPart);
 
-        var baseQuotient = situationFamiliale == "Marié/Pacsé" ? 2 : 1;
-        decimal quotientEnfants = (decimal) Math.PI;
+        return Result<decimal>.Success(Math.Round(impotParPart * partsFiscales, 2));
+    }
 
-        if (nombreEnfants == 0)
-        {
-            quotientEnfants = 0;
-        }
-        else if (nombreEnfants == 1)
-        {
-            quotientEnfants = 0.5m;
-        }
-        else if (nombreEnfants == 2)
-        {
-            quotientEnfants = 1.0m;
-        }
-        else
-        {
-            quotientEnfants = 1.0m + (nombreEnfants - 2) * 0.5m;
-        }
-
+    private static decimal PartsFiscales(int baseQuotient, decimal quotientEnfants, decimal revenuAnnuel, out decimal impotParPart)
+    {
         var partsFiscales = baseQuotient + quotientEnfants;
         var revenuImposableParPart = revenuAnnuel / partsFiscales;
 
-        decimal impot = 0;
-        for (var i = 0; i < TranchesImposition.Length; i++)
+        impotParPart = TranchesTauxImposition
+            .Select((kvp, index) => new
+            {
+                LowerBound = index > 0 ? TranchesTauxImposition.ElementAt(index - 1).Key : 0,
+                UpperBound = kvp.Key,
+                Rate = kvp.Value
+            })
+            .Where(t => revenuImposableParPart > t.LowerBound)
+            .Sum(t => (Math.Min(revenuImposableParPart, t.UpperBound) - t.LowerBound) * t.Rate);
+
+        return partsFiscales;
+    }
+
+    private static Result<bool> VerificationParametre(SituationFoyer situationFoyer)
+    {
+        if (situationFoyer.SituationFamiliale != Statuts.Celibataire && situationFoyer.SituationFamiliale != Statuts.Marie_Pacse)
         {
-            if (revenuImposableParPart <= TranchesImposition[i])
-            {
-                impot += (revenuImposableParPart - (i > 0 ? TranchesImposition[i - 1] : 0)) * TauxImposition[i];
-                break;
-            }
-            else
-            {
-                impot += (TranchesImposition[i] - (i > 0 ? TranchesImposition[i - 1] : 0)) * TauxImposition[i];
-            }
+            return Result<bool>.Failure("Situation familiale invalide.");
         }
 
-        if (revenuImposableParPart > TranchesImposition[^1])
+        if (situationFoyer.SalaireMensuel <= 0)
         {
-            impot += (revenuImposableParPart - TranchesImposition[^1]) * TauxImposition[^1];
+            return Result<bool>.Failure("Les salaires doivent être positifs.");
         }
 
-        var impotParPart = impot;
+        if (situationFoyer.SituationFamiliale == Statuts.Marie_Pacse && situationFoyer.SalaireMensuelConjoint < 0)
+        {
+            return Result<bool>.Failure("Les salaires doivent être positifs.");
+        }
+        if (situationFoyer.NbEnfants < 0)
+        {
+            return Result<bool>.Failure("Le nombre d'enfants ne peut pas être négatif.");
+        }
 
-        return Math.Round(impotParPart * partsFiscales, 2);
+        return Result<bool>.Success(true);
+    }
+    private static decimal RevenuAnnuel(SituationFoyer situationFoyer)
+    {
+
+        decimal revenuAnnuel;
+        if (situationFoyer.SituationFamiliale == Statuts.Marie_Pacse)
+        {
+            revenuAnnuel = (situationFoyer.SalaireMensuel + situationFoyer.SalaireMensuelConjoint) * 12;
+        }
+        else
+        {
+            revenuAnnuel = situationFoyer.SalaireMensuel * 12;
+        }
+        return revenuAnnuel;
     }
 }

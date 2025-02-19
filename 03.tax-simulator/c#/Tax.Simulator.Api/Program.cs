@@ -19,20 +19,31 @@ app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 app.MapGet("/api/tax/calculate",
         (string situationFamiliale, decimal salaireMensuel, decimal salaireMensuelConjoint, int nombreEnfants) =>
         {
-            try
+            Statuts statuts;
+            switch (situationFamiliale)
             {
-                return Results.Ok(
-                    Simulateur.CalculerImpotsAnnuel(
-                        situationFamiliale,
-                        salaireMensuel,
-                        salaireMensuelConjoint,
-                        nombreEnfants)
-                );
+                case "Marié/Pacsé":
+                    statuts = Statuts.Marie_Pacse;
+                    break;
+                case "Célibataire":
+                    statuts = Statuts.Celibataire;
+                    break;
+                default:
+                    statuts = Statuts.Celibataire;
+                    break;
             }
-            catch (ArgumentException ex)
+
+            SituationFoyer situationFoyer =
+                SituationFoyer.InstantiateSituationFoyer(statuts, salaireMensuel, salaireMensuelConjoint,
+                    nombreEnfants);
+            var result = Simulateur.CalculerImpotsAnnuel(situationFoyer);
+
+            if (!result.IsSuccess)
             {
-                return Results.BadRequest(ex.Message);
+                return Results.BadRequest(result.Error);
             }
+
+            return Results.Ok(result.Value);
         })
     .WithName("CalculateTax");
 
