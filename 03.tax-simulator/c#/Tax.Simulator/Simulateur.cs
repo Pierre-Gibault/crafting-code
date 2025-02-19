@@ -23,15 +23,7 @@ public static class Simulateur
             throw new InvalidDataException("Les salaires doivent être positifs.");
         }
 
-        decimal revenuAnnuel;
-        if (situationFoyer.SituationFamiliale == Statuts.Marie_Pacse)
-        {
-            revenuAnnuel = (situationFoyer.SalaireMensuel + situationFoyer.SalaireMensuelConjoint) * 12;
-        }
-        else
-        {
-            revenuAnnuel = situationFoyer.SalaireMensuel * 12;
-        }
+        decimal revenuAnnuel = RevenuAnnuel(situationFoyer);
 
         var baseQuotient = situationFoyer.SituationFamiliale == Statuts.Marie_Pacse ? 2 : 1;
         decimal quotientEnfants = 0;
@@ -64,6 +56,20 @@ public static class Simulateur
         var impotParPart = impot;
 
         return Math.Round(impotParPart * partsFiscales, 2);
+    }
+    private static decimal RevenuAnnuel(SituationFoyer situationFoyer)
+    {
+
+        decimal revenuAnnuel;
+        if (situationFoyer.SituationFamiliale == Statuts.Marie_Pacse)
+        {
+            revenuAnnuel = (situationFoyer.SalaireMensuel + situationFoyer.SalaireMensuelConjoint) * 12;
+        }
+        else
+        {
+            revenuAnnuel = situationFoyer.SalaireMensuel * 12;
+        }
+        return revenuAnnuel;
     }
     private static decimal CalculerQuotientEnfant(int situationFoyerNbEnfants)
     {
