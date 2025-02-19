@@ -70,5 +70,30 @@ public class SimulateurShould
         act.Should().Throw<ArgumentException>().WithMessage("Les salaires doivent être positifs.");
     }
     
+    [Fact]
+    public void TestCalculeLesImpotsPourUnCoupleMarié()
+    {
+        var situationFamiliale = "Marié/Pacsé";
+        var salaireMensuel = 2000;
+        var salaireMensuelConjoint = 2500;
+        var nombreEnfants = 0;
+        var expectedResult = 4043.90m;
+        
+        var result = Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        
+        result.Should().Be(expectedResult);
+    }
     
+    [Fact]
+    public void TestLanceraUneExceptionPourUnSalaireConjointNégatif()
+    {
+        var situationFamiliale = "Marié/Pacsé";
+        var salaireMensuel = 2000m;
+        var salaireMensuelConjoint = -2500m;
+        var nombreEnfants = 0;
+        
+        Action act = () => Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        
+        act.Should().Throw<InvalidDataException>().WithMessage("Les salaires doivent être positifs.");
+    }
 }
