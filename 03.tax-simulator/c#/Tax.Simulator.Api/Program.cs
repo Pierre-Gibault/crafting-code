@@ -21,13 +21,24 @@ app.MapGet("/api/tax/calculate",
         {
             try
             {
-                Statuts.TryParse(situationFamiliale, out Statuts statuts);
+                Statuts statuts;
+                switch(situationFamiliale)
+                {
+                    case "Marié/Pacsé":
+                        statuts = Statuts.Marie_Pacse;
+                        break;
+                    case "Célibataire":
+                        statuts = Statuts.Celibataire;
+                        break;
+                    default:
+                        statuts = Statuts.Celibataire;
+                        break;
+                }
+                SituationFoyer situationFoyer = SituationFoyer.InstantiateSituationFoyer(statuts, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
                 return Results.Ok(
                     Simulateur.CalculerImpotsAnnuel(
-                        statuts,
-                        salaireMensuel,
-                        salaireMensuelConjoint,
-                        nombreEnfants)
+                        situationFoyer
+                    )
                 );
             }
             catch (ArgumentException ex)
