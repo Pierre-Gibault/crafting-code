@@ -2,9 +2,16 @@ namespace Tax.Simulator;
 
 public static class Simulateur
 {
-    private static readonly decimal[] TranchesImposition = {10225m, 26070m, 74545m, 160336m, 500000m}; // Plafonds des tranches
-    private static readonly decimal[] TauxImposition = {0.0m, 0.11m, 0.30m, 0.41m, 0.45m, 0.48m}; // Taux correspondants
-
+    private static readonly Dictionary<decimal, decimal> TranchesTauxImposition = new Dictionary<decimal, decimal>
+    {
+        { 10225m, 0.0m },
+        { 26070m, 0.11m },
+        { 74545m, 0.30m },
+        { 160336m, 0.41m },
+        { 500000m, 0.45m },
+        { decimal.MaxValue, 0.48m }
+    };
+    
     public static decimal CalculerImpotsAnnuel(
         SituationFoyer situationFoyer)
     {
@@ -26,20 +33,20 @@ public static class Simulateur
     {
         var partsFiscales = baseQuotient + quotientEnfants;
         var revenuImposableParPart = revenuAnnuel / partsFiscales;
-        
-        impotParPart = TranchesImposition
-            .Select((tranche, index) => new
+
+        impotParPart = TranchesTauxImposition
+            .Select((kvp, index) => new
             {
-                LowerBound = index > 0 ? TranchesImposition[index - 1] : 0,
-                UpperBound = tranche,
-                Rate = TauxImposition[index]
+                LowerBound = index > 0 ? TranchesTauxImposition.ElementAt(index - 1).Key : 0,
+                UpperBound = kvp.Key,
+                Rate = kvp.Value
             })
             .Where(t => revenuImposableParPart > t.LowerBound)
             .Sum(t => (Math.Min(revenuImposableParPart, t.UpperBound) - t.LowerBound) * t.Rate);
-        
-        if (revenuImposableParPart > TranchesImposition[^1])
+
+        if (revenuImposableParPart > TranchesTauxImposition.Keys.Max())
         {
-            impotParPart += (revenuImposableParPart - TranchesImposition[^1]) * TauxImposition[^1];
+            impotParPart += (revenuImposableParPart - TranchesTauxImposition.Keys.Max()) * TranchesTauxImposition[TranchesTauxImposition.Keys.Max()];
         }
 
         return partsFiscales;
