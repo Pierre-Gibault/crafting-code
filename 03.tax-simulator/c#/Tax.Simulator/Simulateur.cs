@@ -12,23 +12,31 @@ public static class Simulateur
         { decimal.MaxValue, 0.48m }
     };
     
-    public static decimal CalculerImpotsAnnuel(
-        SituationFoyer situationFoyer)
+    public static Result<decimal> CalculerImpotsAnnuel(SituationFoyer situationFoyer)
     {
-        VerificationParametre(situationFoyer);
+        var verificationResult = VerificationParametre(situationFoyer);
+        if (!verificationResult.IsSuccess)
+        {
+            return Result<decimal>.Failure(verificationResult.Error);
+        }
 
         decimal revenuAnnuel = RevenuAnnuel(situationFoyer);
 
         var baseQuotient = situationFoyer.SituationFamiliale == Statuts.Marie_Pacse ? 2 : 1;
         decimal quotientEnfants = 0;
 
-        quotientEnfants = CalculerQuotientEnfant(situationFoyer.NbEnfants);
-        
+        var quotientEnfantsResult = CalculerQuotientEnfant(situationFoyer.NbEnfants);
+        if (!quotientEnfantsResult.IsSuccess)
+        {
+            return Result<decimal>.Failure(quotientEnfantsResult.Error);
+        }
+        quotientEnfants = quotientEnfantsResult.Value;
 
         decimal partsFiscales = PartsFiscales(baseQuotient, quotientEnfants, revenuAnnuel, out decimal impotParPart);
 
-        return Math.Round(impotParPart * partsFiscales, 2);
+        return Result<decimal>.Success(Math.Round(impotParPart * partsFiscales, 2));
     }
+    
     private static decimal PartsFiscales(int baseQuotient, decimal quotientEnfants, decimal revenuAnnuel, out decimal impotParPart)
     {
         var partsFiscales = baseQuotient + quotientEnfants;
@@ -51,25 +59,25 @@ public static class Simulateur
 
         return partsFiscales;
     }
-
-
-    private static void VerificationParametre(SituationFoyer situationFoyer)
+    
+    private static Result<bool> VerificationParametre(SituationFoyer situationFoyer)
     {
-
         if (situationFoyer.SituationFamiliale != Statuts.Celibataire && situationFoyer.SituationFamiliale != Statuts.Marie_Pacse)
         {
-            throw new ArgumentException("Situation familiale invalide.");
+            return Result<bool>.Failure("Situation familiale invalide.");
         }
 
         if (situationFoyer.SalaireMensuel <= 0)
         {
-            throw new ArgumentException("Les salaires doivent être positifs.");
+            return Result<bool>.Failure("Les salaires doivent être positifs.");
         }
 
         if (situationFoyer.SituationFamiliale == Statuts.Marie_Pacse && situationFoyer.SalaireMensuelConjoint < 0)
         {
-            throw new InvalidDataException("Les salaires doivent être positifs.");
+            return Result<bool>.Failure("Les salaires doivent être positifs.");
         }
+
+        return Result<bool>.Success(true);
     }
     private static decimal RevenuAnnuel(SituationFoyer situationFoyer)
     {
@@ -85,12 +93,16 @@ public static class Simulateur
         }
         return revenuAnnuel;
     }
-    private static decimal CalculerQuotientEnfant(int situationFoyerNbEnfants)
+    private static Result<decimal> CalculerQuotientEnfant(int situationFoyerNbEnfants)
     {
+        var result = Result<decimal>.Success(situationFoyerNbEnfants <= 2
+            ? situationFoyerNbEnfants * 0.5m
+            : 1.0m + (situationFoyerNbEnfants - 2) * 0.5m);
         if (situationFoyerNbEnfants < 0)
         {
-            throw new ArgumentException("Le nombre d'enfants ne peut pas être négatif.");
+            result = Result<decimal>.Failure("Le nombre d'enfants ne peut pas être négatif.");
         }
-        return situationFoyerNbEnfants <= 2 ? situationFoyerNbEnfants * 0.5m : 1.0m + (situationFoyerNbEnfants - 2) * 0.5m;
+
+        return result;
     }
 }
