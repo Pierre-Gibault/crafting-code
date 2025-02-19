@@ -13,7 +13,9 @@ public class SimulateurShould
         var salaireMensuelConjoint = 0m;
         var nombreEnfants = 0;
         
-        var impots = Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        var situationFoyer = SituationFoyer.InstantiateSituationFoyer(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+
+        var impots = Simulateur.CalculerImpotsAnnuel(situationFoyer);
         
         impots.Should().Be(87308.56m);
     }
@@ -26,7 +28,9 @@ public class SimulateurShould
         var salaireMensuelConjoint = 0m;
         var nombreEnfants = 0;
         
-        var impots = Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        var situationFoyer = SituationFoyer.InstantiateSituationFoyer(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+
+        var impots = Simulateur.CalculerImpotsAnnuel(situationFoyer);
         
         impots.Should().Be(223508.56m);
     }
@@ -38,8 +42,9 @@ public class SimulateurShould
         var salaireMensuel = 25000m;
         var salaireMensuelConjoint = 30000m;
         var nombreEnfants = 2;
+        var situationFoyer = SituationFoyer.InstantiateSituationFoyer(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
 
-        var impots = Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        var impots = Simulateur.CalculerImpotsAnnuel(situationFoyer);
 
         impots.Should().Be(234925.68m);
     }
@@ -52,7 +57,9 @@ public class SimulateurShould
         var nombreEnfants = 0;
         var expectedResult = 1515.25m;
         
-        var result = Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        var situationFoyer = SituationFoyer.InstantiateSituationFoyer(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+
+        var result = Simulateur.CalculerImpotsAnnuel(situationFoyer);
         
         result.Should().Be(expectedResult);
     }
@@ -65,7 +72,9 @@ public class SimulateurShould
         var salaireMensuelConjoint = 0m;
         var nombreEnfants = 0;
         
-        Action act = () => Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        var situationFoyer = SituationFoyer.InstantiateSituationFoyer(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        
+        Action act = () => Simulateur.CalculerImpotsAnnuel(situationFoyer);
         
         act.Should().Throw<ArgumentException>().WithMessage("Les salaires doivent être positifs.");
     }
@@ -78,8 +87,9 @@ public class SimulateurShould
         var salaireMensuelConjoint = 2500;
         var nombreEnfants = 0;
         var expectedResult = 4043.90m;
-        
-        var result = Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        var situationFoyer = SituationFoyer.InstantiateSituationFoyer(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+
+        var result = Simulateur.CalculerImpotsAnnuel(situationFoyer);
         
         result.Should().Be(expectedResult);
     }
@@ -91,8 +101,9 @@ public class SimulateurShould
         var salaireMensuel = 2000m;
         var salaireMensuelConjoint = -2500m;
         var nombreEnfants = 0;
-        
-        Action act = () => Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        var situationFoyer = SituationFoyer.InstantiateSituationFoyer(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+
+        Action act = () => Simulateur.CalculerImpotsAnnuel(situationFoyer);
         
         act.Should().Throw<InvalidDataException>().WithMessage("Les salaires doivent être positifs.");
     }
@@ -104,8 +115,9 @@ public class SimulateurShould
         var salaireMensuel = 3000m;
         var salaireMensuelConjoint = 3000m;
         var nombreEnfants = 3;
-        
-        decimal act = Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        var situationFoyer = SituationFoyer.InstantiateSituationFoyer(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+
+        decimal act = Simulateur.CalculerImpotsAnnuel(situationFoyer);
         
         act.Should().Be(3983.37m);
     }
@@ -117,8 +129,9 @@ public class SimulateurShould
         var salaireMensuel = 2000m;
         var salaireMensuelConjoint = 2000m;
         var nombreEnfants = -1;
-        
-        Action act = () => Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        var situationFoyer = SituationFoyer.InstantiateSituationFoyer(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+
+        Action act = () => Simulateur.CalculerImpotsAnnuel(situationFoyer);
         
         act.Should().Throw<ArgumentException>().WithMessage("Le nombre d'enfants ne peut pas être négatif.");
     }
@@ -130,8 +143,9 @@ public class SimulateurShould
         var salaireMensuel = 2000m;
         var salaireMensuelConjoint = 0m;
         var nombreEnfants = 0;
-        
-        Action act = () => Simulateur.CalculerImpotsAnnuel(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+        var situationFoyer = SituationFoyer.InstantiateSituationFoyer(situationFamiliale, salaireMensuel, salaireMensuelConjoint, nombreEnfants);
+
+        Action act = () => Simulateur.CalculerImpotsAnnuel(situationFoyer);
         
         act.Should().Throw<ArgumentException>().WithMessage("Situation familiale invalide.");
     }
