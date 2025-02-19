@@ -8,7 +8,7 @@ public class SimulateurShould
     [Fact(DisplayName = "Célibataire, 240 000€/an, 0 enfant -> 87308.56€")]
     public void TestPasDimpotsSurHautRevenu()
     {
-        var situationFamiliale = "Célibataire";
+        var situationFamiliale = Statuts.Celibataire;
         var salaireMensuel = 20000m;
         var salaireMensuelConjoint = 0m;
         var nombreEnfants = 0;
@@ -21,7 +21,7 @@ public class SimulateurShould
     [Fact(DisplayName = "Célibataire, 540 000€/an, 0 enfant -> 223508.56€")]
     public void TestImpotsSurHautRevenu()
     {
-        var situationFamiliale = "Célibataire";
+        var situationFamiliale = Statuts.Celibataire;
         var salaireMensuel = 45000m;
         var salaireMensuelConjoint = 0m;
         var nombreEnfants = 0;
@@ -34,7 +34,7 @@ public class SimulateurShould
     [Fact(DisplayName = "Marié/Pacsé, 25 000€/mois, 30 000€/mois, 2 enfants -> 234 925.68€")]
     public void TestImpotsSurRevenusConjoints()
     {
-        var situationFamiliale = "Marié/Pacsé";
+        var situationFamiliale = Statuts.Marie_Pacse;
         var salaireMensuel = 25000m;
         var salaireMensuelConjoint = 30000m;
         var nombreEnfants = 2;
@@ -46,7 +46,7 @@ public class SimulateurShould
     [Fact]
     public void TestCalculImpotsPourUnCelibataire()
     {
-        var situationFamiliale = "Célibataire";
+        var situationFamiliale = Statuts.Celibataire;
         var salaireMensuel = 2000m;
         var salaireMensuelConjoint = 0m;
         var nombreEnfants = 0;
@@ -60,7 +60,7 @@ public class SimulateurShould
     [Fact]
     public void TestLanceraUneExceptionPourUnSalaireNégatif()
     {
-        var situationFamiliale = "Célibataire";
+        var situationFamiliale = Statuts.Celibataire;
         var salaireMensuel = -2000m;
         var salaireMensuelConjoint = 0m;
         var nombreEnfants = 0;
@@ -73,7 +73,7 @@ public class SimulateurShould
     [Fact]
     public void TestCalculeLesImpotsPourUnCoupleMarié()
     {
-        var situationFamiliale = "Marié/Pacsé";
+        var situationFamiliale = Statuts.Marie_Pacse;
         var salaireMensuel = 2000;
         var salaireMensuelConjoint = 2500;
         var nombreEnfants = 0;
@@ -87,7 +87,7 @@ public class SimulateurShould
     [Fact]
     public void TestLanceraUneExceptionPourUnSalaireConjointNégatif()
     {
-        var situationFamiliale = "Marié/Pacsé";
+        var situationFamiliale = Statuts.Marie_Pacse;
         var salaireMensuel = 2000m;
         var salaireMensuelConjoint = -2500m;
         var nombreEnfants = 0;
@@ -100,7 +100,7 @@ public class SimulateurShould
     [Fact]
     public void TestCalculateTaxForMarriedCoupleWithChildren()
     {
-        var situationFamiliale = "Marié/Pacsé";
+        var situationFamiliale = Statuts.Marie_Pacse;
         var salaireMensuel = 3000m;
         var salaireMensuelConjoint = 3000m;
         var nombreEnfants = 3;
@@ -113,7 +113,7 @@ public class SimulateurShould
     [Fact]
     public void TestLanceraUneExceptionPourUnNombreDenfantsNégatif()
     {
-        var situationFamiliale = "Marié/Pacsé";
+        var situationFamiliale = Statuts.Marie_Pacse;
         var salaireMensuel = 2000m;
         var salaireMensuelConjoint = 2000m;
         var nombreEnfants = -1;
@@ -126,7 +126,7 @@ public class SimulateurShould
     [Fact]
     public void TestLanceraUneExceptionPourUneSituationFamilialeInvalide()
     {
-        var situationFamiliale = "Divorcé";
+        var situationFamiliale = Statuts.Divorce;
         var salaireMensuel = 2000m;
         var salaireMensuelConjoint = 0m;
         var nombreEnfants = 0;
