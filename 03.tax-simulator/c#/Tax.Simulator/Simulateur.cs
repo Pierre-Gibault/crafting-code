@@ -22,7 +22,7 @@ public static class Simulateur
         var baseQuotient = situationFoyer.SituationFamiliale == Statuts.Marie_Pacse ? 2 : 1;
         decimal quotientEnfants = 0;
 
-        quotientEnfants = CalculerQuotientEnfant(situationFoyer.NbEnfants);
+        quotientEnfants = situationFoyer.NbEnfants / 2m;
         
 
         decimal partsFiscales = PartsFiscales(baseQuotient, quotientEnfants, revenuAnnuel, out decimal impotParPart);
@@ -43,11 +43,6 @@ public static class Simulateur
             })
             .Where(t => revenuImposableParPart > t.LowerBound)
             .Sum(t => (Math.Min(revenuImposableParPart, t.UpperBound) - t.LowerBound) * t.Rate);
-
-        if (revenuImposableParPart > TranchesTauxImposition.Keys.Max())
-        {
-            impotParPart += (revenuImposableParPart - TranchesTauxImposition.Keys.Max()) * TranchesTauxImposition[TranchesTauxImposition.Keys.Max()];
-        }
 
         return partsFiscales;
     }
@@ -70,6 +65,10 @@ public static class Simulateur
         {
             throw new InvalidDataException("Les salaires doivent être positifs.");
         }
+        if (situationFoyer.NbEnfants < 0)
+        {
+            throw new ArgumentException("Le nombre d'enfants ne peut pas être négatif.");
+        }
     }
     private static decimal RevenuAnnuel(SituationFoyer situationFoyer)
     {
@@ -84,13 +83,5 @@ public static class Simulateur
             revenuAnnuel = situationFoyer.SalaireMensuel * 12;
         }
         return revenuAnnuel;
-    }
-    private static decimal CalculerQuotientEnfant(int situationFoyerNbEnfants)
-    {
-        if (situationFoyerNbEnfants < 0)
-        {
-            throw new ArgumentException("Le nombre d'enfants ne peut pas être négatif.");
-        }
-        return situationFoyerNbEnfants <= 2 ? situationFoyerNbEnfants * 0.5m : 1.0m + (situationFoyerNbEnfants - 2) * 0.5m;
     }
 }
