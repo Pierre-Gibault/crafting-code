@@ -23,11 +23,6 @@ public static class Simulateur
             throw new InvalidDataException("Les salaires doivent être positifs.");
         }
 
-        if (situationFoyer.NbEnfants < 0)
-        {
-            throw new ArgumentException("Le nombre d'enfants ne peut pas être négatif.");
-        }
-
         decimal revenuAnnuel;
         if (situationFoyer.SituationFamiliale == Statuts.Marie_Pacse)
         {
@@ -39,24 +34,10 @@ public static class Simulateur
         }
 
         var baseQuotient = situationFoyer.SituationFamiliale == Statuts.Marie_Pacse ? 2 : 1;
-        decimal quotientEnfants = (decimal) Math.PI;
+        decimal quotientEnfants = 0;
 
-        if (situationFoyer.NbEnfants == 0)
-        {
-            quotientEnfants = 0;
-        }
-        else if (situationFoyer.NbEnfants == 1)
-        {
-            quotientEnfants = 0.5m;
-        }
-        else if (situationFoyer.NbEnfants == 2)
-        {
-            quotientEnfants = 1.0m;
-        }
-        else
-        {
-            quotientEnfants = 1.0m + (situationFoyer.NbEnfants - 2) * 0.5m;
-        }
+        quotientEnfants = CalculerQuotientEnfant(situationFoyer.NbEnfants);
+        
 
         var partsFiscales = baseQuotient + quotientEnfants;
         var revenuImposableParPart = revenuAnnuel / partsFiscales;
@@ -83,5 +64,13 @@ public static class Simulateur
         var impotParPart = impot;
 
         return Math.Round(impotParPart * partsFiscales, 2);
+    }
+    private static decimal CalculerQuotientEnfant(int situationFoyerNbEnfants)
+    {
+        if (situationFoyerNbEnfants < 0)
+        {
+            throw new ArgumentException("Le nombre d'enfants ne peut pas être négatif.");
+        }
+        return situationFoyerNbEnfants <= 2 ? situationFoyerNbEnfants * 0.5m : 1.0m + (situationFoyerNbEnfants - 2) * 0.5m;
     }
 }
