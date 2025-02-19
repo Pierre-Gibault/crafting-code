@@ -21,9 +21,10 @@ app.MapGet("/api/tax/calculate",
         {
             try
             {
+                Statuts.TryParse(situationFamiliale, out Statuts statuts);
                 return Results.Ok(
                     Simulateur.CalculerImpotsAnnuel(
-                        situationFamiliale,
+                        statuts,
                         salaireMensuel,
                         salaireMensuelConjoint,
                         nombreEnfants)

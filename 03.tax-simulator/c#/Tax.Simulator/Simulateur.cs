@@ -6,12 +6,12 @@ public static class Simulateur
     private static readonly decimal[] TauxImposition = {0.0m, 0.11m, 0.30m, 0.41m, 0.45m, 0.48m}; // Taux correspondants
 
     public static decimal CalculerImpotsAnnuel(
-        string situationFamiliale,
+        Statuts situationFamiliale,
         decimal salaireMensuel,
         decimal salaireMensuelConjoint,
         int nombreEnfants)
     {
-        if (situationFamiliale != "Célibataire" && situationFamiliale != "Marié/Pacsé")
+        if (situationFamiliale != Statuts.Celibataire && situationFamiliale != Statuts.Marie_Pacse)
         {
             throw new ArgumentException("Situation familiale invalide.");
         }
@@ -21,7 +21,7 @@ public static class Simulateur
             throw new ArgumentException("Les salaires doivent être positifs.");
         }
 
-        if (situationFamiliale == "Marié/Pacsé" && salaireMensuelConjoint < 0)
+        if (situationFamiliale == Statuts.Marie_Pacse && salaireMensuelConjoint < 0)
         {
             throw new InvalidDataException("Les salaires doivent être positifs.");
         }
@@ -32,7 +32,7 @@ public static class Simulateur
         }
 
         decimal revenuAnnuel;
-        if (situationFamiliale == "Marié/Pacsé")
+        if (situationFamiliale == Statuts.Marie_Pacse)
         {
             revenuAnnuel = (salaireMensuel + salaireMensuelConjoint) * 12;
         }
@@ -41,7 +41,7 @@ public static class Simulateur
             revenuAnnuel = salaireMensuel * 12;
         }
 
-        var baseQuotient = situationFamiliale == "Marié/Pacsé" ? 2 : 1;
+        var baseQuotient = situationFamiliale == Statuts.Marie_Pacse ? 2 : 1;
         decimal quotientEnfants = (decimal) Math.PI;
 
         if (nombreEnfants == 0)
